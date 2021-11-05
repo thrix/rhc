@@ -322,6 +322,12 @@ func main() {
 					Name:      "post",
 					Usage:     "perform an HTTP POST request to a console.redhat.com application",
 					UsageText: fmt.Sprintf("%v api post SERVICE [ACTION] < BODY", app.Name),
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:  "content-type",
+							Value: "application/json",
+						},
+					},
 					Action: func(c *cli.Context) error {
 						if c.NArg() < 1 {
 							return cli.Exit(fmt.Errorf("error: missing required argument 'service'"), 1)
@@ -331,7 +337,7 @@ func main() {
 						if err != nil {
 							return cli.Exit(fmt.Errorf("cannot read body: %w", err), 1)
 						}
-						if err := post(URL, nil, body); err != nil {
+						if err := post(URL, map[string]string{"Content-Type": c.String("content-type")}, body); err != nil {
 							return cli.Exit(fmt.Errorf("error: HTTP request failed: %w", err), 1)
 						}
 						return nil
