@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -252,6 +254,89 @@ func main() {
 				fmt.Printf("\nManage your Red Hat connector systems: https://red.ht/connector\n")
 
 				return nil
+			},
+		},
+		{
+			Name:   "api",
+			Hidden: true,
+			Usage:  "perform API requests against console.redhat.com",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "username",
+					Usage: "basic HTTP authentication with `USERNAME`",
+				},
+				&cli.StringFlag{
+					Name:  "password",
+					Usage: "basic HTTP authentication with `PASSWORD`",
+				},
+				&cli.StringFlag{
+					Name:  "cert-file",
+					Usage: "mutual TLS authentication with `CERT`",
+				},
+				&cli.StringFlag{
+					Name:  "key-file",
+					Usage: "mutual TLS authentication with `KEY`",
+				},
+				&cli.StringFlag{
+					Name:  "base-url",
+					Usage: "send HTTP requests to `URL`",
+					Value: "https://cert.cloud.redhat.com/api",
+				},
+			},
+			Action: func(c *cli.Context) error {
+				cli.ShowAppHelpAndExit(c, 0)
+				return nil
+			},
+			Before: func(c *cli.Context) error {
+				config := &tls.Config{}
+				if c.String("cert-file") != "" && c.String("key-file") != "" {
+					cert, err := tls.LoadX509KeyPair(c.String("cert-file"), c.String("key-file"))
+					if err != nil {
+						return cli.Exit(fmt.Errorf("cannot load x509 key pair: %w", err), 1)
+					}
+					config.Certificates = []tls.Certificate{cert}
+				}
+
+				initHTTPClient(config, c.String("username"), c.String("password"), fmt.Sprintf("rhc-api/%v", Version))
+				return nil
+			},
+			Subcommands: []*cli.Command{
+				{
+					Name:      "get",
+					Usage:     "perform an HTTP GET request to a console.redhat.com application",
+					UsageText: fmt.Sprintf("%v api get SERVICE [ACTION] [PARAMETERS]", app.Name),
+					Action: func(c *cli.Context) error {
+						if c.NArg() < 1 {
+							return cli.Exit(fmt.Errorf("error: missing required argument 'service'"), 1)
+						}
+						URL := fmt.Sprintf("%v/%v/v1/%v?%v", c.String("base-url"), c.Args().Get(0), c.Args().Get(1), c.Args().Get(2))
+						data, err := get(URL, nil)
+						if err != nil {
+							return cli.Exit(fmt.Errorf("error: HTTP request failed: %w", err), 1)
+						}
+						fmt.Println(string(data))
+						return nil
+					},
+				},
+				{
+					Name:      "post",
+					Usage:     "perform an HTTP POST request to a console.redhat.com application",
+					UsageText: fmt.Sprintf("%v api post SERVICE [ACTION] < BODY", app.Name),
+					Action: func(c *cli.Context) error {
+						if c.NArg() < 1 {
+							return cli.Exit(fmt.Errorf("error: missing required argument 'service'"), 1)
+						}
+						URL := fmt.Sprintf("%v/%v/v1/%v", c.String("base-url"), c.Args().Get(0), c.Args().Get(1))
+						body, err := ioutil.ReadAll(os.Stdin)
+						if err != nil {
+							return cli.Exit(fmt.Errorf("cannot read body: %w", err), 1)
+						}
+						if err := post(URL, nil, body); err != nil {
+							return cli.Exit(fmt.Errorf("error: HTTP request failed: %w", err), 1)
+						}
+						return nil
+					},
+				},
 			},
 		},
 	}
