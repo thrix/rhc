@@ -18,6 +18,9 @@ Source0: %{name}-%{version}-@RELEASE@.tar.gz
 Source1: https://github.com/RedHatInsights/yggdrasil/releases/download/0.2.1/yggdrasil-0.2.1.tar.gz
 Source2: https://github.com/RedHatInsights/yggdrasil-worker-package-manager/releases/download/0.1.0/yggdrasil-worker-package-manager-0.1.0.tar.gz
 
+# Fixed upstream https://github.com/RedHatInsights/yggdrasil/pull/73
+Patch0:  https://github.com/RedHatInsights/yggdrasil/commit/03800bc2874705af9f3a3e6aa22f4e24812f8f80.patch
+
 ExclusiveArch: %{go_arches}
 
 Requires:      insights-client
@@ -37,6 +40,8 @@ MQTT client.
 %setup -T -D -c -n %{name} -a 0
 %setup -T -D -c -n %{name} -a 1
 %setup -T -D -c -n %{name} -a 2
+cd %{_builddir}/%{name}/yggdrasil-0.2.1
+%patch0 -p1
 
 
 %build
