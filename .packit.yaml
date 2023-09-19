@@ -12,7 +12,9 @@ jobs:
       # https://packit.dev/docs/configuration/#aliases
       - centos-stream-9-x86_64
       - fedora-latest-stable
+      # http://storage.tft.osci.redhat.com/composes-production.html
+      - RHEL-8-Updated
     skip_build: true
-    manual_trigger: true
+    # manual_trigger: true
     labels:
       - unit
