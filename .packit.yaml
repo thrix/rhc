@@ -14,6 +14,7 @@ jobs:
       - fedora-latest-stable
       # http://storage.tft.osci.redhat.com/composes-production.html
       - RHEL-8-Updated
+    use_internal_tf: True
     skip_build: true
     # manual_trigger: true
     labels:
