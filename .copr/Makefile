@@ -14,10 +14,7 @@ srpm: RELEASE = $(shell printf "0.%s.git.%s" $(shell git rev-list $(shell git de
 srpm: PKGNAME = $(SHORTNAME)
 
 .PHONY: srpm
-srpm: deps
-	mkdir -p $(SOURCEDIR)
-	mkdir -p $(SRCRPMDIR)
-	mkdir -p $(outdir)
+$(spec)/rhc.spec: $(spec)/.copr/rhc.spec.in
 	sed \
 	    -e 's,[@]SHORTNAME[@],$(SHORTNAME),g' \
 		-e 's,[@]LONGNAME[@],$(LONGNAME),g' \
@@ -37,7 +34,12 @@ srpm: deps
 		-e 's,[@]SYSCONFDIR[@],$(SYSCONFDIR),g' \
 		-e 's,[@]LOCALSTATEDIR[@],$(LOCALSTATEDIR),g' \
 		-e 's,[@]DOCDIR[@],$(DOCDIR),g' \
-		$(spec)/.copr/rhc.spec.in > $(spec)/rhc.spec
+		$< > $@
+
+srpm: $(spec)/rhc.spec deps
+	mkdir -p $(SOURCEDIR)
+	mkdir -p $(SRCRPMDIR)
+	mkdir -p $(outdir)
 	make PKGNAME=$(PKGNAME) VERSION=$(VERSION)-$(RELEASE) dist
 	install -D -m644 $(PKGNAME)-$(VERSION)-$(RELEASE).tar.gz $(SOURCEDIR)
 	spectool --get-files --source 1 --sourcedir $(spec)/rhc.spec
