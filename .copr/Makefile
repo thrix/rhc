@@ -6,12 +6,12 @@ spec ?= $(PWD)
 SOURCEDIR := $(shell rpmbuild -E %_sourcedir)
 SRCRPMDIR := $(shell rpmbuild -E %_srcrpmdir)
 
-srpm: SHORTNAME = $(shell basename $(PWD))
-srpm: LONGNAME = $(SHORTNAME)
-srpm: BRANDNAME = $(SHORTNAME)
-srpm: VERSION := $(shell echo $(VERSION) | awk -F. '{printf("%d.%d.%d", $$1, $$2, $$3+1)}')
-srpm: RELEASE = $(shell printf "0.%s.git.%s" $(shell git rev-list $(shell git describe --tags --abbrev=0 --always | tr -d '\n')..HEAD --count | tr -d '\n') $(shell git rev-parse --short HEAD | tr -d '\n'))
-srpm: PKGNAME = $(SHORTNAME)
+SHORTNAME = $(shell basename $(PWD))
+LONGNAME = $(SHORTNAME)
+BRANDNAME = $(SHORTNAME)
+VERSION := $(shell echo $(VERSION) | awk -F. '{printf("%d.%d.%d", $$1, $$2, $$3+1)}')
+RELEASE = $(shell printf "0.%s.git.%s" $(shell git rev-list $(shell git describe --tags --abbrev=0 --always | tr -d '\n')..HEAD --count | tr -d '\n') $(shell git rev-parse --short HEAD | tr -d '\n'))
+PKGNAME = $(SHORTNAME)
 
 .PHONY: srpm tarball
 $(spec)/rhc.spec: $(spec)/.copr/rhc.spec.in
