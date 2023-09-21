@@ -13,7 +13,7 @@ srpm: VERSION := $(shell echo $(VERSION) | awk -F. '{printf("%d.%d.%d", $$1, $$2
 srpm: RELEASE = $(shell printf "0.%s.git.%s" $(shell git rev-list $(shell git describe --tags --abbrev=0 --always | tr -d '\n')..HEAD --count | tr -d '\n') $(shell git rev-parse --short HEAD | tr -d '\n'))
 srpm: PKGNAME = $(SHORTNAME)
 
-.PHONY: srpm
+.PHONY: srpm tarball
 $(spec)/rhc.spec: $(spec)/.copr/rhc.spec.in
 	sed \
 	    -e 's,[@]SHORTNAME[@],$(SHORTNAME),g' \
@@ -36,11 +36,13 @@ $(spec)/rhc.spec: $(spec)/.copr/rhc.spec.in
 		-e 's,[@]DOCDIR[@],$(DOCDIR),g' \
 		$< > $@
 
-srpm: $(spec)/rhc.spec deps
+tarball: $(spec)/rhc.spec
+	make PKGNAME=$(PKGNAME) VERSION=$(VERSION)-$(RELEASE) dist
+
+srpm: $(spec)/rhc.spec tarball deps
 	mkdir -p $(SOURCEDIR)
 	mkdir -p $(SRCRPMDIR)
 	mkdir -p $(outdir)
-	make PKGNAME=$(PKGNAME) VERSION=$(VERSION)-$(RELEASE) dist
 	install -D -m644 $(PKGNAME)-$(VERSION)-$(RELEASE).tar.gz $(SOURCEDIR)
 	spectool --get-files --source 1 --sourcedir $(spec)/rhc.spec
 	spectool --get-files --source 2 --sourcedir $(spec)/rhc.spec
