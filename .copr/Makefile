@@ -25,15 +25,6 @@ $(spec)/rhc.spec: $(spec)/.copr/rhc.spec.in
 		-e 's,[@]TOPICPREFIX[@],$(TOPICPREFIX),g' \
 		-e 's,[@]DATAHOST[@],$(DATAHOST),g' \
 		-e 's,[@]PROVIDER[@],$(PROVIDER),g' \
-		-e 's,[@]PREFIX[@],$(PREFIX),g' \
-		-e 's,[@]BINDIR[@],$(BINDIR),g' \
-		-e 's,[@]SBINDIR[@],$(SBINDIR),g' \
-		-e 's,[@]LIBEXECDIR[@],$(LIBEXECDIR),g' \
-		-e 's,[@]DATAROOTDIR[@],$(DATAROOTDIR),g' \
-		-e 's,[@]DATADIR[@],$(DATADIR),g' \
-		-e 's,[@]SYSCONFDIR[@],$(SYSCONFDIR),g' \
-		-e 's,[@]LOCALSTATEDIR[@],$(LOCALSTATEDIR),g' \
-		-e 's,[@]DOCDIR[@],$(DOCDIR),g' \
 		$< > $@
 
 tarball: $(spec)/rhc.spec
