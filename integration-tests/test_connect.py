@@ -18,6 +18,7 @@ from utils import (
 )
 
 logger = logging.getLogger(__name__)
+pytestmark = pytest.mark.usefixtures("install_katello_rpm")
 
 
 @pytest.mark.parametrize("auth", ["basic", "activation-key"])
